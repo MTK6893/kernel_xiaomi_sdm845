@@ -1868,8 +1868,6 @@ static int __init inet_init(void)
 
 	ip_init();
 
-	tcp_v4_init();
-
 	/* Initialise per-cpu ipv4 mibs */
 	if (init_ipv4_mibs())
 		panic("%s: Cannot init ipv4 mibs\n", __func__);
