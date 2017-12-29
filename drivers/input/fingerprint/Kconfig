@@ -22,3 +22,9 @@ source "drivers/input/fingerprint/goodix_ta/Kconfig"
 source "drivers/input/fingerprint/synaptics/Kconfig"
 
 endif
+
+if MACH_XIAOMI_C6
+source "drivers/input/fingerprint/goodix_mido/Kconfig"
+source "drivers/input/fingerprint/fpc_mido/Kconfig"
+endif
+
