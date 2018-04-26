@@ -243,7 +243,7 @@ do {									\
 	VAL;							\
 })
 #endif
-
+ 
 /**
  * smp_cond_load_acquire() - (Spin) wait for cond with ACQUIRE ordering
  * @ptr: pointer to the variable to wait on
