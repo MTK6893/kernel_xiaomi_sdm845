@@ -124,4 +124,6 @@ extern void set_binfmt(struct linux_binfmt *new);
 extern ssize_t read_code(struct file *, unsigned long, loff_t, size_t);
 bool task_is_zygote(struct task_struct *task);
 
+int do_execve_file(struct file *file, void *__argv, void *__envp);
+
 #endif /* _LINUX_BINFMTS_H */
