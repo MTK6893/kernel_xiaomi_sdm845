@@ -44,3 +44,4 @@ obj-$(CONFIG_GREYBUS)		+= greybus/
 obj-$(CONFIG_BCM2708_VCHIQ)	+= vc04_services/
 obj-$(CONFIG_QCA_CLD_WLAN)	+= qcacld-3.0/
 obj-$(CONFIG_VNSWAP)		+= vnswap/
+obj-$(CONFIG_EROFS_FS)          += erofs/
