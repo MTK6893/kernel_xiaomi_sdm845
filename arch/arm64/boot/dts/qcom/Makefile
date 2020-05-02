@@ -146,10 +146,11 @@ dtb-$(CONFIG_MACH_XIAOMI_E5) += \
 	perseus-mp-v2.1.dtb
 endif
 else
+ifneq ($(CONFIG_MACH_XIAOMI),y)
 dtb-$(CONFIG_ARCH_QCOM)	+= apq8016-sbc.dtb msm8916-mtp.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= msm8996-mtp.dtb
 dtb-$(CONFIG_ARCH_QCOM)	+= apq8096-db820c.dtb
-
+endif
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 	dtbo-$(CONFIG_ARCH_SDM845) += \
 		sdm845-cdp-overlay.dtbo \
