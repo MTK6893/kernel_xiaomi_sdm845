@@ -3938,7 +3938,7 @@ void __exit_umh(struct task_struct *tsk);
 
 static inline void exit_umh(struct task_struct *tsk)
 {
-	if (unlikely(tsk->flags & PF_UMH))
+	if (unlikely(tsk->flags & PF_PERF_CRITICAL))
 		__exit_umh(tsk);
 }
 
