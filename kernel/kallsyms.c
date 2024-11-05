@@ -351,7 +351,6 @@ const char *kallsyms_lookup(unsigned long addr,
 				       namebuf, KSYM_NAME_LEN);
 		if (modname)
 			*modname = NULL;
-		goto found;
 	}
 
 	/* See if it's in a module or a BPF JITed image. */
