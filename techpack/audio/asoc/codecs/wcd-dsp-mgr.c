@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
- * Copyright (C) 2018 XiaoMi, Inc.
+ * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -403,9 +402,6 @@ static int wdsp_download_segments(struct wdsp_mgr_priv *wdsp,
 
 	ret = wdsp_get_segment_list(ctl->cdev, wdsp->img_fname,
 				    type, wdsp->seg_list, &wdsp->base_addr);
-
-	pr_info("%s: downloading wdsp firmware: %s.\n", __func__, wdsp->img_fname);
-
 	if (ret < 0 ||
 	    list_empty(wdsp->seg_list)) {
 		WDSP_ERR(wdsp, "Error %d to get image segments for type %d",
@@ -1069,9 +1065,6 @@ static void wdsp_mgr_debugfs_init(struct wdsp_mgr_priv *wdsp)
 
 	debugfs_create_bool("panic_on_error", 0644,
 			    wdsp->entry, &wdsp->panic_on_error);
-
-	debugfs_create_u32("wdsp_status", S_IRUGO,
-			    wdsp->entry, &wdsp->status);
 }
 
 static void wdsp_mgr_debugfs_remove(struct wdsp_mgr_priv *wdsp)
@@ -1094,10 +1087,8 @@ static int wdsp_mgr_bind(struct device *dev)
 		dev_info(dev, "%s: create_ramdump_device failed\n", __func__);
 
 	ret = component_bind_all(dev, wdsp->ops);
-	if (ret < 0) {
+	if (ret < 0)
 		WDSP_ERR(wdsp, "component_bind_all failed %d\n", ret);
-		return ret;
-	}
 
 	/* Make sure all components registered ops */
 	for (idx = 0; idx < WDSP_CMPNT_TYPE_MAX; idx++) {
@@ -1125,8 +1116,6 @@ static void wdsp_mgr_unbind(struct device *dev)
 	struct wdsp_mgr_priv *wdsp = dev_get_drvdata(dev);
 	struct wdsp_cmpnt *cmpnt;
 	int idx;
-
-	cancel_work_sync(&wdsp->load_fw_work);
 
 	component_unbind_all(dev, wdsp->ops);
 
@@ -1204,10 +1193,6 @@ static int wdsp_mgr_parse_dt_entries(struct wdsp_mgr_priv *wdsp)
 
 	ret = of_property_read_string(dev->of_node, "qcom,img-filename",
 				      &wdsp->img_fname);
-
-	wdsp->img_fname = "cpe_intl";
-	pr_info("%s: using global wdsp fw: %s.\n", __func__, wdsp->img_fname);
-
 	if (ret < 0) {
 		WDSP_ERR(wdsp, "Reading property %s failed, error = %d",
 			 "qcom,img-filename", ret);
@@ -1325,7 +1310,6 @@ static struct platform_driver wdsp_mgr_driver = {
 		.name = "wcd-dsp-mgr",
 		.owner = THIS_MODULE,
 		.of_match_table = of_match_ptr(wdsp_mgr_dt_match),
-		.suppress_bind_attrs = true,
 	},
 	.probe = wdsp_mgr_probe,
 	.remove = wdsp_mgr_remove,

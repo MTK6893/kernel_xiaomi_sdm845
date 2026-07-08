@@ -1,5 +1,4 @@
-/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
- * Copyright (C) 2018 XiaoMi, Inc.
+/* Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -141,7 +140,11 @@ do {                                                    \
 #define OCP_ATTEMPT 20
 #define HS_DETECT_PLUG_TIME_MS (3 * 1000)
 #define SPECIAL_HS_DETECT_TIME_MS (2 * 1000)
+#ifdef CONFIG_MACH_XIAOMI_C6
+#define MBHC_BUTTON_PRESS_THRESHOLD_MIN 750
+#else
 #define MBHC_BUTTON_PRESS_THRESHOLD_MIN 250
+#endif
 #define GND_MIC_SWAP_THRESHOLD 4
 #define GND_MIC_USBC_SWAP_THRESHOLD 2
 #define WCD_FAKE_REMOVAL_MIN_PERIOD_MS 100
@@ -190,7 +193,6 @@ enum wcd_mbhc_register_function {
 	WCD_MBHC_BTN_DBNC,
 	WCD_MBHC_HS_VREF,
 	WCD_MBHC_HS_COMP_RESULT,
-	WCD_MBHC_IN2P_CLAMP_STATE,
 	WCD_MBHC_MIC_SCHMT_RESULT,
 	WCD_MBHC_HPHL_SCHMT_RESULT,
 	WCD_MBHC_HPHR_SCHMT_RESULT,
@@ -412,15 +414,9 @@ struct usbc_ana_audio_config {
 	int usbc_en1_gpio;
 	int usbc_en2_gpio;
 	int usbc_force_gpio;
-	int euro_us_hw_switch_gpio;
-	int uart_audio_switch_gpio;
-	int subpcb_id_gpio;
 	struct device_node *usbc_en1_gpio_p; /* used by pinctrl API */
 	struct device_node *usbc_en2_gpio_p; /* used by pinctrl API */
 	struct device_node *usbc_force_gpio_p; /* used by pinctrl API */
-	struct device_node *euro_us_hw_switch_gpio_p; /* used by pinctrl API */
-	struct device_node *uart_audio_switch_gpio_p; /* used by pinctrl API */
-	struct device_node *subpcb_id_gpio_p; /* used by pinctrl API */
 };
 
 struct wcd_mbhc_config {
@@ -439,8 +435,6 @@ struct wcd_mbhc_config {
 	bool enable_anc_mic_detect;
 	u32 enable_usbc_analog;
 	struct usbc_ana_audio_config usbc_analog_cfg;
-	void (*enable_dual_adc_gpio)(struct device_node *node, bool en);
-	struct device_node *dual_adc_gpio_node;
 };
 
 struct wcd_mbhc_intr {
@@ -535,7 +529,6 @@ struct wcd_mbhc {
 	bool gnd_swh; /*track GND switch NC / NO */
 	u32 hs_thr;
 	u32 hph_thr;
-	u32 micb_mv;
 	u32 swap_thr;
 	u32 moist_vref;
 	u32 moist_iref;

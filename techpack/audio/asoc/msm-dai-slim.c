@@ -389,7 +389,7 @@ static void msm_dai_slim_shutdown(struct snd_pcm_substream *stream,
 	dai_data = msm_slim_get_dai_data(drv_data, dai);
 	dma_data = snd_soc_dai_get_dma_data(dai, stream);
 	if (!dma_data || !dai_data) {
-		dev_err(dai->dev,
+		dev_dbg(dai->dev,
 			"%s: Invalid %s\n", __func__,
 			(!dma_data) ? "dma_data" : "dai_data");
 		return;
@@ -397,7 +397,7 @@ static void msm_dai_slim_shutdown(struct snd_pcm_substream *stream,
 
 	if ((!(dai_data->status & DAI_STATE_PREPARED)) ||
 	     dai_data->status & DAI_STATE_RUNNING) {
-		dev_err(dai->dev,
+		dev_dbg(dai->dev,
 			"%s: dai id (%d) has invalid state 0x%x\n",
 			__func__, dai->id, dai_data->status);
 		return;
@@ -642,7 +642,7 @@ static struct slim_driver msm_dai_slim_driver = {
 	.id_table = msm_dai_slim_dt_match,
 };
 
-static int __init msm_dai_slim_init(void)
+int __init msm_dai_slim_init(void)
 {
 	int rc;
 
@@ -652,12 +652,11 @@ static int __init msm_dai_slim_init(void)
 			__func__, rc);
 	return rc;
 }
-module_init(msm_dai_slim_init);
 
-static void __exit msm_dai_slim_exit(void)
+void msm_dai_slim_exit(void)
 {
+	slim_driver_unregister(&msm_dai_slim_driver);
 }
-module_exit(msm_dai_slim_exit);
 
 /* Module information */
 MODULE_DESCRIPTION("Slimbus apps-owned channel handling driver");

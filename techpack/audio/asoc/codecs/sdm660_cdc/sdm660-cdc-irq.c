@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -133,12 +133,8 @@ int wcd9xxx_spmi_request_irq(int irq, irq_handler_t handler,
 		platform_get_irq_byname(map.spmi[BIT_BYTE(irq)],
 					irq_names[irq]);
 
-	if (strcmp(name, "mbhc sw intr"))
-		irq_flags = IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING |
+	irq_flags = IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING |
 			IRQF_ONESHOT;
-	else
-		irq_flags = IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING |
-			IRQF_ONESHOT | IRQF_NO_SUSPEND;
 	pr_debug("%s: name:%s irq_flags = %lx\n", __func__, name, irq_flags);
 
 	rc = devm_request_threaded_irq(&map.spmi[BIT_BYTE(irq)]->dev,
@@ -409,5 +405,10 @@ int wcd9xxx_spmi_irq_init(void)
 	return 0;
 }
 
+void wcd9xxx_spmi_irq_exit(void)
+{
+	pm_qos_remove_request(&map.pm_qos_req);
+	mutex_destroy(&map.pm_lock);
+}
 MODULE_DESCRIPTION("MSM8x16 SPMI IRQ driver");
 MODULE_LICENSE("GPL v2");

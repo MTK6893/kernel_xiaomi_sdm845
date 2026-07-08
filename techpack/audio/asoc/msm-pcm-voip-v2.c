@@ -1,13 +1,6 @@
-/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/* Copyright (c) 2012-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2023, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/init.h>
@@ -371,6 +364,13 @@ static void voip_process_ul_pkt(uint8_t *voc_pkt,
 		switch (prtd->mode) {
 		case MODE_AMR_WB:
 		case MODE_AMR: {
+			if (pkt_len <= DSP_FRAME_HDR_LEN) {
+				pr_err("%s: pkt_len %d is < required len\n",
+						__func__, pkt_len);
+				spin_unlock_irqrestore(&prtd->dsp_ul_lock,
+							dsp_flags);
+				return;
+			}
 			/* Remove the DSP frame info header. Header format:
 			 * Bits 0-3: Frame rate
 			 * Bits 4-7: Frame type
@@ -391,6 +391,13 @@ static void voip_process_ul_pkt(uint8_t *voc_pkt,
 		case MODE_4GV_NB:
 		case MODE_4GV_WB:
 		case MODE_4GV_NW: {
+			if (pkt_len <= DSP_FRAME_HDR_LEN) {
+				pr_err("%s: pkt_len %d is < required len\n",
+						__func__, pkt_len);
+				spin_unlock_irqrestore(&prtd->dsp_ul_lock,
+							dsp_flags);
+				return;
+			}
 			/* Remove the DSP frame info header.
 			 * Header format:
 			 * Bits 0-3: frame rate
@@ -428,6 +435,13 @@ static void voip_process_ul_pkt(uint8_t *voc_pkt,
 			buf_node->frame.frm_hdr.timestamp = timestamp;
 			voc_pkt = voc_pkt + DSP_FRAME_HDR_LEN;
 
+			if (pkt_len <= 2 * DSP_FRAME_HDR_LEN) {
+				pr_err("%s: pkt_len %d is < required len\n",
+						__func__, pkt_len);
+				spin_unlock_irqrestore(&prtd->dsp_ul_lock,
+							dsp_flags);
+				return;
+			}
 			/* There are two frames in the buffer. Length of the
 			 * first frame:
 			 */
@@ -477,7 +491,7 @@ static void voip_process_ul_pkt(uint8_t *voc_pkt,
 					      &prtd->out_queue);
 			} else {
 				/* Drop the second frame */
-				pr_err("%s: UL data dropped, read is slow\n",
+				pr_debug("%s: UL data dropped, read is slow\n",
 				       __func__);
 			}
 			break;
@@ -503,7 +517,7 @@ static void voip_process_ul_pkt(uint8_t *voc_pkt,
 		snd_pcm_period_elapsed(prtd->capture_substream);
 	} else {
 		spin_unlock_irqrestore(&prtd->dsp_ul_lock, dsp_flags);
-		pr_err("UL data dropped\n");
+		pr_debug("UL data dropped\n");
 	}
 
 	wake_up(&prtd->out_wait);
@@ -670,7 +684,7 @@ static void voip_process_dl_pkt(uint8_t *voc_pkt, void *private_data)
 	} else {
 		*((uint32_t *)voc_pkt) = 0;
 		spin_unlock_irqrestore(&prtd->dsp_lock, dsp_flags);
-		pr_err_ratelimited("DL data not available\n");
+		pr_debug("DL data not available\n");
 	}
 	wake_up(&prtd->in_wait);
 }
@@ -921,7 +935,7 @@ static int msm_pcm_capture_copy(struct snd_pcm_substream *substream,
 
 
 	} else if (ret == 0) {
-		pr_err_ratelimited("%s: No UL data available\n", __func__);
+		pr_debug("%s: No UL data available\n", __func__);
 		ret = -ETIMEDOUT;
 	} else {
 		pr_err("%s: Read was interrupted\n", __func__);
@@ -1679,13 +1693,12 @@ static struct platform_driver msm_pcm_driver = {
 		.name = "msm-voip-dsp",
 		.owner = THIS_MODULE,
 		.of_match_table = msm_voip_dt_match,
-		.suppress_bind_attrs = true,
 	},
 	.probe = msm_pcm_probe,
 	.remove = msm_pcm_remove,
 };
 
-static int __init msm_soc_platform_init(void)
+int __init msm_pcm_voip_init(void)
 {
 	memset(&voip_info, 0, sizeof(voip_info));
 	voip_info.mode = MODE_PCM;
@@ -1704,13 +1717,11 @@ static int __init msm_soc_platform_init(void)
 
 	return platform_driver_register(&msm_pcm_driver);
 }
-module_init(msm_soc_platform_init);
 
-static void __exit msm_soc_platform_exit(void)
+void msm_pcm_voip_exit(void)
 {
 	platform_driver_unregister(&msm_pcm_driver);
 }
-module_exit(msm_soc_platform_exit);
 
 MODULE_DESCRIPTION("PCM module platform driver");
 MODULE_LICENSE("GPL v2");

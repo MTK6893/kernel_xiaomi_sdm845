@@ -251,8 +251,8 @@ static long aac_in_ioctl_shared(struct file *file, unsigned int cmd, void *arg)
 		if (min_bitrate > 24000)
 			min_bitrate = 24000;
 		max_bitrate = 6*(cfg->sample_rate)*(cfg->channels);
-		if (max_bitrate > 192000)
-			max_bitrate = 192000;
+		if (max_bitrate > 320000)
+			max_bitrate = 320000;
 		if ((cfg->bit_rate < min_bitrate) ||
 			(cfg->bit_rate > max_bitrate)) {
 			pr_err("%s: bitrate permissible: max=%d, min=%d\n",
@@ -702,8 +702,12 @@ struct miscdevice audio_aac_in_misc = {
 	.fops	= &audio_in_fops,
 };
 
-static int __init aac_in_init(void)
+int __init aac_in_init(void)
 {
 	return misc_register(&audio_aac_in_misc);
 }
-device_initcall(aac_in_init);
+
+void aac_in_exit(void)
+{
+	misc_deregister(&audio_aac_in_misc);
+}

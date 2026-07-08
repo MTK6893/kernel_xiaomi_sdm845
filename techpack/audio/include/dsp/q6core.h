@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2019, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -35,6 +35,7 @@ struct audio_uevent_data {
 int q6core_init_uevent_data(struct audio_uevent_data *uevent_data, char *name);
 void q6core_destroy_uevent_data(struct audio_uevent_data *uevent_data);
 int q6core_send_uevent(struct audio_uevent_data *uevent_data, char *name);
+int q6core_get_avcs_api_version_per_service(uint32_t service_id);
 
 #define ADSP_CMD_SET_DTS_EAGLE_DATA_ID 0x00012919
 #define DTS_EAGLE_LICENSE_ID           0x00028346
@@ -170,5 +171,25 @@ struct avcs_cmd_deregister_topologies {
 
 int32_t core_set_license(uint32_t key, uint32_t module_id);
 int32_t core_get_license_status(uint32_t module_id);
+
+#define AVCS_GET_VERSIONS	0x00012905
+struct avcs_cmd_get_version_result {
+	struct apr_hdr hdr;
+	uint32_t id;
+};
+#define AVCS_GET_VERSIONS_RSP	0x00012906
+
+#define AVCS_CMDRSP_Q6_ID_2_6	0x00040000
+#define AVCS_CMDRSP_Q6_ID_2_7	0x00040001
+#define AVCS_CMDRSP_Q6_ID_2_8   0x00040002
+
+enum q6_subsys_image {
+	Q6_SUBSYS_AVS2_6 = 1,
+	Q6_SUBSYS_AVS2_7,
+	Q6_SUBSYS_AVS2_8,
+	Q6_SUBSYS_INVALID,
+};
+enum q6_subsys_image q6core_get_avs_version(void);
+int core_get_adsp_ver(void);
 
 #endif /* __Q6CORE_H__ */
